@@ -11,10 +11,15 @@ interface ProductProps {
     imageUrl: string
     price: string
     description: string
+    defaultPriceId: string
   }
 }
 
 export default function Product({ product }: ProductProps) {
+  function handleBuyProduct() {
+    console.log(product.defaultPriceId)
+  }
+
   return (
     <ProductContainer>
       <ImageContainer>
@@ -28,7 +33,7 @@ export default function Product({ product }: ProductProps) {
 
         <p>{product.description}</p>
 
-        <button>Buy now</button>
+        <button onClick={handleBuyProduct}>Buy now</button>
       </ProductDetails>
     </ProductContainer>
   )
@@ -46,7 +51,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ params }) => {
-  const productId = params.id;
+  const productId = params.id
 
   const product = await stripe.products.retrieve(productId, {
     expand: ['default_price']
@@ -64,7 +69,8 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
           style: 'currency',
           currency: 'USD'
         }).format(price.unit_amount! / 100),
-        description: product.description
+        description: product.description,
+        defaultPriceId: price.id,
       }
     },
     revalidate: 60 * 60 * 1 // 1 hour
